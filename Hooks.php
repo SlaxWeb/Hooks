@@ -5,14 +5,6 @@ class Hooks
 {
     protected static $_hooks = [];
 
-    public static function init()
-    {
-        require_once(APPPATH . "config/hooks.php");
-
-        $loader = Registry::get("loader");
-        $loader->add("Hooks\\", APPPATH);
-    }
-
     public static function set(array $hook)
     {
         if ((isset($hook["name"]) && isset($hook["class"])) === false) {
