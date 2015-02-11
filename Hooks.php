@@ -23,7 +23,7 @@ class Hooks
         $name = array_shift($params);
         if (isset(self::$_hooks[$name])) {
             $obj = new self::$_hooks[$name]();
-            $obj->init(...$params);
+            return $obj->init(...$params);
         }
     }
 }
