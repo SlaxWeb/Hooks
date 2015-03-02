@@ -11,7 +11,11 @@ class Hooks
             return false;
         }
 
-        self::$_hooks[$hook["name"]] = $hook["class"];
+        if (isset(self::$_hooks[$hook["name"]])) {
+            self::$_hooks[$hook["name"]][] = $hook["class"];
+        } else {
+            self::$_hooks[$hook["name"]] = [$hook["class"]];
+        }
 
         return true;
     }
@@ -22,8 +26,13 @@ class Hooks
 
         $name = array_shift($params);
         if (isset(self::$_hooks[$name])) {
-            $obj = new self::$_hooks[$name]();
-            return $obj->init(...$params);
+            foreach (self::$_hooks[$name] as $h) {
+                $obj = new $h;
+                $ret = $obj->init(...$params);
+                if ($ret !== null) {
+                    return $ret;
+                }
+            }
         }
     }
 }
