@@ -12,9 +12,17 @@ class Hooks
         }
 
         if (isset(self::$_hooks[$hook["name"]])) {
-            self::$_hooks[$hook["name"]][] = $hook["class"];
+            if (isset($hook["method"])) {
+                self::$_hooks[$hook["name"]][$hook["method"]] = $hook["class"];
+            } else {
+                self::$_hooks[$hook["name"]][] = $hook["class"];
+            }
         } else {
-            self::$_hooks[$hook["name"]] = [$hook["class"]];
+            if (isset($hook["method"])) {
+                self::$_hooks[$hook["name"]] = [$hook["method"] => $hook["class"]];
+            } else {
+                self::$_hooks[$hook["name"]] = [$hook["class"]];
+            }
         }
 
         return true;
@@ -26,9 +34,13 @@ class Hooks
 
         $name = array_shift($params);
         if (isset(self::$_hooks[$name])) {
-            foreach (self::$_hooks[$name] as $h) {
+            foreach (self::$_hooks[$name] as $method => $h) {
                 $obj = new $h;
-                $ret = $obj->init(...$params);
+                if (is_int($method)) {
+                    $ret = $obj->init(...$params);
+                } else {
+                    $ret = $obj->{$method}(...$params);
+                }
                 if ($ret !== null) {
                     return $ret;
                 }
