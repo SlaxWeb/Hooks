@@ -42,8 +42,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             "\\Psr\\Log\\LoggerInterface"
         );
 
-        $this->_logger->expects($this->once())->method("info");
-
         $this->_container = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Container")
             ->disableOriginalConstructor();
     }
@@ -71,6 +69,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $container = $this->_container->setMethods(null)
             ->getMock();
+        $this->_logger->expects($this->once())->method("info");
 
         $container->__construct($this->_logger);
     }
@@ -87,6 +86,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         $container = $this->_container->setMethods(null)
             ->getMock();
+        $this->_logger->expects($this->once())->method("info");
         $container->__construct($this->_logger);
 
         // Make sure it typehints
@@ -97,7 +97,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             $error = true;
         }
         if ($error === false) {
-            throw new Exception("Expected TypeError did not occur.");
+            throw new \Exception("Expected TypeError did not occur.");
         }
 
         // Make sure it accepts the Hook object
@@ -128,7 +128,8 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container = $this->_container->setMethods(null)
             ->getMock();
 
-        $this->_logger->expects($this->once())->method("debug");
+        $this->_logger->expects($this->exactly(3))->method("info");
+        $this->_logger->expects($this->exactly(3))->method("debug");
 
         $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
             ->setMethods(null)
@@ -141,5 +142,117 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->__construct($this->_logger);
         $container->addHook($hook);
         $container->addHook($hook);
+        $this->assertEquals([true, true], $container->exec("test"));
+    }
+
+    /**
+     * Test Hook Not Found On 'exec'
+     *
+     * Test that correct errors are thrown, when no hook name is provided for
+     * the 'exec' method or the name is not in string format, or the name is not
+     * found in the container.
+     *
+     * @return \Mock_Container Mocked Hooks Container
+     */
+    public function testExecHookNameErrors()
+    {
+        $container = $this->_container->setMethods(null)->getMock();
+
+        $this->_logger->expects($this->once())->method("info");
+        $this->_logger->expects($this->once())->method("debug");
+        $this->_logger->expects($this->once())->method("notice");
+
+        $container->__construct($this->_logger);
+
+        $exception = [false, false];
+        try {
+            $container->exec();
+        } catch (\TypeError $e) {
+            $exception[0] = true;
+        }
+        try {
+            $container->exec(new \stdClass);
+        } catch (\TypeError $e) {
+            $exception[1] = true;
+        }
+        if ($exception !== [true, true]) {
+            throw new \Exception("Expected TypeError to be thrown two times");
+        }
+
+        $this->assertNull($container->exec("missing"));
+
+        return $container;
+    }
+
+    /**
+     * Test Hook Order of Execution
+     *
+     * Test that added hook definitions get executed in the correct order, and
+     * return values are returned in an array on multiple definitions.
+     *
+     * @return void
+     */
+    public function testHookOrderOfExec()
+    {
+        $container = $this->_container->setMethods(null)->getMock();
+        $this->_logger->expects($this->exactly(5))->method("info");
+        $this->_logger->expects($this->exactly(6))->method("debug");
+        $container->__construct($this->_logger);
+
+        $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
+            ->setMethods(null)
+            ->getMock();
+
+        for ($hooks = 1; $hooks <= 3; $hooks++) {
+            $hook = clone $hook;
+            $hook->name = "test";
+            $hook->definition = function () use ($hooks) {
+                if ($hooks === 3) {
+                    return null;
+                }
+                return $hooks;
+            };
+            $container->addHook($hook);
+        }
+
+        $this->assertEquals($container->exec("test"), [1, 2]);
+
+        $hook = clone $hook;
+        $hook->name = "test2";
+        $hook->definition = function () {
+            return true;
+        };
+
+        $container->addHook($hook);
+        $this->assertTrue($container->exec("test2"));
+    }
+
+    /**
+     * Test Hook Execution Parameters
+     *
+     * Test that an instance of the Hooks container is passed as the first
+     * parameter to the hook definition, and all further parameters passed to
+     * 'exec' method get passed to the hook definition.
+     *
+     * @return void
+     * @depends testExecHookNameErrors
+     */
+    public function testHookExecParams(\SlaxWeb\Hooks\Container $container)
+    {
+        $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
+            ->setMethods(null)
+            ->getMock();
+
+        $hook->name = "test";
+        $hook->definition = function () {
+            return func_get_args();
+        };
+
+        $container->addHook($hook);
+
+        $this->assertEquals(
+            [$container, [true, false, "param"]],
+            $container->exec("test", true, false, "param")
+        );
     }
 }

@@ -62,6 +62,44 @@ class Container
             $this->_hooks[$hook->name] = [];
         }
 
-        $this->_hooks[$hook->name] = $hook;
+        $this->_hooks[$hook->name][] = $hook->definition;
+        unset($hook);
+    }
+
+    /**
+     * Execute hook definition
+     *
+     * Execute all definitions for the retrieved hook names in the order that
+     * they have been inserted, and store their return values in an array, if it
+     * is not null. If only one definition was called, then return that
+     * executions return value directly, if there were more calls, return the
+     * 'return array'.
+     *
+     * @param string Hook name
+     * @return mixed
+     */
+    public function exec(string $name)
+    {
+        if (isset($this->_hooks[$name]) === false) {
+            $this->_logger->notice("No hook definitions found for '{$name}'");
+            $this->_logger->debug(
+                "Available hook definitions",
+                [array_keys($this->_hooks)]
+            );
+            return null;
+        }
+
+        $return = [];
+        $params = [$this, array_slice(func_get_args(), 1)];
+        foreach ($this->_hooks[$name] as $definition) {
+            $this->_logger->info("Calling definition for hook '{$name}'");
+            $this->_logger->debug("Hook definition parameters", $params);
+            $retVal = $definition(...$params);
+            if ($retVal !== null) {
+                $return[] = $retVal;
+            }
+        }
+
+        return count($return) === 1 ? $return[0] : $return;
     }
 }
