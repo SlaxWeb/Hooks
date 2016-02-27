@@ -255,4 +255,37 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             $container->exec("test", true, false, "param")
         );
     }
+
+    /**
+     * Test Hook Execution Interuption
+     *
+     * Test that a hook definition can stop further execution of definitions.
+     *
+     * @return void
+     */
+    public function testHookInteruption()
+    {
+        $container = $this->_container->setMethods(null)->getMock();
+        $this->_logger->expects($this->exactly(3))->method("info");
+        $container->__construct($this->_logger);
+
+        $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
+            ->setMethods(null)
+            ->getMock();
+
+        $hook->name = "interrupt";
+        $hook->definition = function ($container) {
+            $container->stopExec();
+            return true;
+        };
+        $container->addHook($hook);
+        $hook = clone $hook;
+        $hook->name = "interrupt";
+        $hook->definition = function () {
+            return false;
+        };
+        $container->addHook($hook);
+
+        $this->assertTrue($container->exec("interrupt"));
+    }
 }

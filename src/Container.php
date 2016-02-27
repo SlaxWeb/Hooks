@@ -32,9 +32,16 @@ class Container
     protected $_hooks = [];
 
     /**
+     * Prevent further execution
+     *
+     * @var bool
+     */
+    protected $_stop = false;
+
+    /**
      * Class constructor
      *
-     * Instantiates the Container, and sets the Logger to the protected proprty
+     * Instantiates the Container, and sets the Logger to the protected property
      * and writes the successful init message to the logger.
      *
      * @param \Psr\Log\LoggerInterface $logger Logger that implements the PSR
@@ -92,6 +99,14 @@ class Container
         $return = [];
         $params = [$this, array_slice(func_get_args(), 1)];
         foreach ($this->_hooks[$name] as $definition) {
+            if ($this->_stop === true) {
+                $this->_stop = false;
+                $this->_logger->info(
+                    "Hook execution was interrupted for hook '{$name}'"
+                );
+                break;
+            }
+
             $this->_logger->info("Calling definition for hook '{$name}'");
             $this->_logger->debug("Hook definition parameters", $params);
             $retVal = $definition(...$params);
@@ -101,5 +116,17 @@ class Container
         }
 
         return count($return) === 1 ? $return[0] : $return;
+    }
+
+    /**
+     * Prevent further execution
+     *
+     * Stops execution of all further defined hook definitions.
+     *
+     * @return void
+     */
+    public function stopExec()
+    {
+        $this->_stop = true;
     }
 }
