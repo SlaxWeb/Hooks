@@ -6,7 +6,7 @@
  * Hook class objects. It also provides methods for adding new definitions, and
  * execution of those user definitions.
  *
- * @package   SlaxWeb\Config
+ * @package   SlaxWeb\Hooks
  * @author    Tomaz Lovrec <tomaz.lovrec@gmail.com>
  * @copyright 2016 (c) Tomaz Lovrec
  * @license   MIT <https://opensource.org/licenses/MIT>
@@ -25,6 +25,13 @@ class Container
     protected $_logger = null;
 
     /**
+     * Hook definition container
+     *
+     * @var array
+     */
+    protected $_hooks = [];
+
+    /**
      * Class constructor
      *
      * Instantiates the Container, and sets the Logger to the protected proprty
@@ -37,6 +44,24 @@ class Container
     {
         $this->_logger = $logger;
 
-        $this->_logger->addInfo("Hooks component initialized");
+        $this->_logger->info("Hooks component initialized");
+    }
+
+    /**
+     * Add hook definition to container
+     *
+     * @param \SlaxWeb\Hooks\Hook $hook Hook definition
+     * @return void
+     */
+    public function addHook(Hook $hook)
+    {
+        if (isset($this->_hooks[$hook->name]) === false) {
+            $this->_logger->debug(
+                "Adding definition for hook '{$hook->name}' for the first time."
+            );
+            $this->_hooks[$hook->name] = [];
+        }
+
+        $this->_hooks[$hook->name] = $hook;
     }
 }

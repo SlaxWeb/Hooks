@@ -14,20 +14,22 @@
         "slaxweb/logger": "0.2.*@dev"
     },
     "require-dev": {
-        "codeception/codeception": "dev-master",
-        "mockery/mockery": "~0.9"
+        "codeception/codeception": "~2.1",
+        "behat/gherkin": "~4.4"
     },
     "suggest": {
         "pimple/pimple": "Make use of available providers for Pimple version 3.0.x"
     },
 	"autoload":	{
 		"psr-4": {
-			"SlaxWeb\\Hooks\\": "src/"
+			"SlaxWeb\\Hooks\\": "src/",
+            "SlaxWeb\\Hooks\\Tests\\Unit\\": "tests/unit/"
 		}
 	},
     "extra": {
         "branch-alias": {
             "dev-develop": "0.4.x-dev"
         }
-    }
+    },
+    "minimum-stability": "dev"
 }
