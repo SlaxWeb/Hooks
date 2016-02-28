@@ -70,7 +70,6 @@ class Container
         }
 
         $this->_hooks[$hook->name][] = $hook->definition;
-        unset($hook);
     }
 
     /**
