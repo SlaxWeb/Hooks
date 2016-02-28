@@ -30,6 +30,24 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     protected $_container = null;
 
     /**
+     * Hook name
+     *
+     * Used for mocking the Hook class properties
+     *
+     * @var string
+     */
+    protected $_hookName = "";
+
+    /**
+     * Hook definition
+     *
+     * Used for mocking the Hook class properties
+     *
+     * @var callable
+     */
+    protected $_hookDefinition = null;
+
+    /**
      * Set up the test
      *
      * Called before each test method is invoked to set up some common stuff.
@@ -102,7 +120,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         // Make sure it accepts the Hook object
         $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
-            ->setMethods(null)
+            ->setMethods([])
             ->getMock();
         $hook->name = "test";
         $hook->definition = function () {
@@ -131,13 +149,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->_logger->expects($this->exactly(3))->method("info");
         $this->_logger->expects($this->exactly(3))->method("debug");
 
-        $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
-            ->setMethods(null)
-            ->getMock();
-        $hook->name = "test";
-        $hook->definition = function () {
+        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
+        $this->_hookName = "test";
+        $this->_hookDefinition = function () {
             return true;
         };
+        $hook->expects($this->any())
+            ->method("__get")
+            ->will($this->returnCallback([$this, "hookReturn"]));
 
         $container->__construct($this->_logger);
         $container->addHook($hook);
@@ -199,29 +218,34 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->_logger->expects($this->exactly(6))->method("debug");
         $container->__construct($this->_logger);
 
-        $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
-            ->setMethods(null)
-            ->getMock();
+        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
 
         for ($hooks = 1; $hooks <= 3; $hooks++) {
             $hook = clone $hook;
-            $hook->name = "test";
-            $hook->definition = function () use ($hooks) {
+            $this->_hookName = "test";
+            $this->_hookDefinition = function () use ($hooks) {
                 if ($hooks === 3) {
                     return null;
                 }
                 return $hooks;
             };
+            $hook->expects($this->any())
+                ->method("__get")
+                ->will($this->returnCallback([$this, "hookReturn"]));
+
             $container->addHook($hook);
         }
 
         $this->assertEquals($container->exec("test"), [1, 2]);
 
         $hook = clone $hook;
-        $hook->name = "test2";
-        $hook->definition = function () {
+        $this->_hookName = "test2";
+        $this->_hookDefinition = function () use ($hooks) {
             return true;
         };
+        $hook->expects($this->any())
+            ->method("__get")
+            ->will($this->returnCallback([$this, "hookReturn"]));
 
         $container->addHook($hook);
         $this->assertTrue($container->exec("test2"));
@@ -239,14 +263,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testHookExecParams(\SlaxWeb\Hooks\Container $container)
     {
-        $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
-            ->setMethods(null)
-            ->getMock();
-
-        $hook->name = "test";
-        $hook->definition = function () {
+        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
+        $this->_hookName = "test";
+        $this->_hookDefinition = function () {
             return func_get_args();
         };
+        $hook->expects($this->any())
+            ->method("__get")
+            ->will($this->returnCallback([$this, "hookReturn"]));
 
         $container->addHook($hook);
 
@@ -269,23 +293,46 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->_logger->expects($this->exactly(3))->method("info");
         $container->__construct($this->_logger);
 
-        $hook = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Hook")
-            ->setMethods(null)
-            ->getMock();
+        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
 
-        $hook->name = "interrupt";
-        $hook->definition = function ($container) {
+        $this->_hookName = "interrupt";
+        $this->_hookDefinition = function ($container) {
             $container->stopExec();
             return true;
         };
+        $hook->expects($this->any())
+            ->method("__get")
+            ->will($this->returnCallback([$this, "hookReturn"]));
         $container->addHook($hook);
+
         $hook = clone $hook;
-        $hook->name = "interrupt";
-        $hook->definition = function () {
+        $this->_hookName = "interrupt";
+        $this->_hookDefinition = function ($container) {
             return false;
         };
+        $hook->expects($this->any())
+            ->method("__get")
+            ->will($this->returnCallback([$this, "hookReturn"]));
         $container->addHook($hook);
 
         $this->assertTrue($container->exec("interrupt"));
+    }
+
+    /**
+     * Hook class callback
+     *
+     * Return the defined values for the name and definition properties of the
+     * mocked Hook object.
+     *
+     * @param string $param Name of the property that was accessed
+     * @return mixed
+     */
+    public function hookReturn($param)
+    {
+        if ($param === "name") {
+            return $this->_hookName;
+        } elseif ($param === "definition") {
+            return $this->_hookDefinition;
+        }
     }
 }
