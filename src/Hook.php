@@ -1,10 +1,9 @@
 <?php
 /**
- * Hooks Container Class
+ * Hook Class
  *
- * The Container class holds all user definitions for hook points in the form of
- * Hook class objects. It also provides methods for adding new definitions, and
- * execution of those user definitions.
+ * The Hook class is used to define that hooks actions, and is injected into the
+ * container.
  *
  * @package   SlaxWeb\Hooks
  * @author    Tomaz Lovrec <tomaz.lovrec@gmail.com>
