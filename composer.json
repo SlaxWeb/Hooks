@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-		"php":	">=7.0.0",
+        "php":  ">=7.0.0",
         "slaxweb/logger": "0.2.*@dev"
     },
     "require-dev": {
@@ -20,12 +20,12 @@
     "suggest": {
         "pimple/pimple": "Make use of available providers for Pimple version 3.0.x"
     },
-	"autoload":	{
-		"psr-4": {
-			"SlaxWeb\\Hooks\\": "src/",
+    "autoload": {
+        "psr-4": {
+            "SlaxWeb\\Hooks\\": "src/",
             "SlaxWeb\\Hooks\\Tests\\Unit\\": "tests/unit/"
-		}
-	},
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-develop": "0.4.x-dev"
