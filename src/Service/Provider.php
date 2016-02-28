@@ -31,8 +31,10 @@ class Provider implements \Pimple\ServiceProviderInterface
             return new \SlaxWeb\Hooks\Container($cont["logger.service"]);
         };
 
-        $container["newHook.factory"] = $this->factory(function (\Pimple\Container $cont) {
-            return new \SlaxWeb\Hooks\Hook;
-        });
+        $container["newHook.factory"] = $container->factory(
+            function (\Pimple\Container $cont) {
+                return new \SlaxWeb\Hooks\Hook;
+            }
+        );
     }
 }
