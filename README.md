@@ -10,6 +10,22 @@ additional components:
 For ease of use the component provides a Factory and a Service Provider for the
 Pimple/Container.
 
+## Installation
+
+Easiest form of installation is through composer, edit your *composer.json* file
+to contain:
+```json
+{
+    "require": {
+        "slaxweb/hooks": "0.4.*@dev"
+    },
+    "minimal-stability": "dev"
+}
+```
+
+Minimal stability is required as long as the Hooks component depends on packages
+that are still in development phase.
+
 ## Usage
 
 This section will cover instantiation of the Hooks container, and adding simple
