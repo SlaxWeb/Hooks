@@ -199,8 +199,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertNull($container->exec("missing"));
-
-        return $container;
     }
 
     /**
@@ -259,10 +257,16 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      * 'exec' method get passed to the hook definition.
      *
      * @return void
-     * @depends testExecHookNameErrors
      */
-    public function testHookExecParams(\SlaxWeb\Hooks\Container $container)
+    public function testHookExecParams()
     {
+        $container = $this->_container->setMethods(null)->getMock();
+
+        $this->_logger->expects($this->exactly(2))->method("info");
+        $this->_logger->expects($this->exactly(2))->method("debug");
+
+        $container->__construct($this->_logger);
+
         $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
         $this->_hookName = "test";
         $this->_hookDefinition = function () {

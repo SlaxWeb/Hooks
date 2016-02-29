@@ -14,7 +14,7 @@
         "slaxweb/logger": "0.2.*@dev"
     },
     "require-dev": {
-        "codeception/codeception": "~2.1",
+        "codeception/codeception": "dev-master",
         "behat/gherkin": "~4.4"
     },
     "suggest": {
