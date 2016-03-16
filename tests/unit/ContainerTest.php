@@ -179,7 +179,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $this->_logger->expects($this->once())->method("info");
         $this->_logger->expects($this->once())->method("debug");
-        $this->_logger->expects($this->once())->method("notice");
 
         $container->__construct($this->_logger);
 

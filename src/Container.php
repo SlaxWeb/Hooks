@@ -87,9 +87,9 @@ class Container
     public function exec(string $name)
     {
         if (isset($this->_hooks[$name]) === false) {
-            $this->_logger->notice("No hook definitions found for '{$name}'");
             $this->_logger->debug(
-                "Available hook definitions",
+                "No hook definitions found for '{$name}'. Available hook "
+                . "definitions",
                 [array_keys($this->_hooks)]
             );
             return null;
