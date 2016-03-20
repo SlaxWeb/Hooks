@@ -1,11 +1,11 @@
 # Hooks
 
+[![Build Status](https://travis-ci.org/SlaxWeb/Hooks.svg?branch=0.4.0)](https://travis-ci.org/SlaxWeb/Hooks)
+
 Hooks component for the SlaxWeb/Framework, to execute arbitrary code in regular
 application execution. Even when the component is meant for the
-SlaxWeb/Framework it can be used outside of it as well. It requires two
-additional components:
-* SlaxWeb/Config
-* SlaxWeb/Logger
+SlaxWeb/Framework it can be used outside of it as well. It the SlaxWeb/Logger as
+an additional component.
 
 For ease of use the component provides a Factory and a Service Provider for the
 Pimple/Container.
@@ -17,14 +17,10 @@ to contain:
 ```json
 {
     "require": {
-        "slaxweb/hooks": "0.4.*@dev"
-    },
-    "minimal-stability": "dev"
+        "slaxweb/hooks": "~0.4"
+    }
 }
 ```
-
-Minimal stability is required as long as the Hooks component depends on packages
-that are still in development phase.
 
 ## Usage
 

@@ -11,7 +11,7 @@
     ],
     "require": {
         "php":  ">=7.0.0",
-        "slaxweb/logger": "0.2.*@dev"
+        "slaxweb/logger": "~0.2"
     },
     "require-dev": {
         "codeception/codeception": "dev-master",
@@ -28,8 +28,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-develop": "0.4.x-dev"
+            "dev-develop": "0.5.x-dev"
         }
-    },
-    "minimum-stability": "dev"
+    }
 }
