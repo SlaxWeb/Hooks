@@ -17,8 +17,9 @@ to contain:
 ```json
 {
     "require": {
-        "slaxweb/hooks": "~0.4"
-    }
+        "slaxweb/hooks": "~0.5.*@dev"
+    },
+    "minimum-stability": "dev"
 }
 ```
 
