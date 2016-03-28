@@ -16,6 +16,11 @@ namespace SlaxWeb\Hooks;
 
 class Hook
 {
+    use \SlaxWeb\GetSet\MagicGet;
+    use \SlaxWeb\GetSet\MagicSet {
+        __set as magicSet;
+    }
+
     /**
      * Name of the hook
      *
@@ -29,28 +34,6 @@ class Hook
      * @var callable
      */
     protected $_definition = null;
-
-    /**
-     * Get magic method
-     *
-     * Used to retrieved protected class properties.
-     *
-     * @param string $param Name of the protected parameter, without the
-     *                      underscore.
-     * @return mixed
-     */
-    public function __get(string $param)
-    {
-        $property = "_{$param}";
-        if (isset($this->{$property}) === false) {
-            throw new Exception\UnknownPropertyException(
-                "Property '{$param}' does not exist in " . __CLASS__ . ", "
-                . "unable to get value."
-            );
-        }
-
-        return $this->{$property};
-    }
 
     /**
      * Set magic method
@@ -70,13 +53,7 @@ class Hook
             );
         }
 
-        $property = "_{$param}";
-        if (isset($this->{$property}) === false) {
-            throw new Exception\UnknownPropertyException(
-                "Property '{$param}' does not exist in " . __CLASS__ . ", "
-                . "unable to get value."
-            );
-        }
+        $this->magicSet($param, $value);
     }
 
     /**

@@ -138,12 +138,12 @@ class HookTest extends \PHPUnit_Framework_TestCase
         $exception = [false, false];
         try {
             $this->_hook->missing;
-        } catch (\SlaxWeb\Hooks\Exception\UnknownPropertyException $e) {
+        } catch (\SlaxWeb\Exception\UnknownPropertyException $e) {
             $exception[0] = true;
         }
         try {
             $this->_hook->missing = "set";
-        } catch (\SlaxWeb\Hooks\Exception\UnknownPropertyException $e) {
+        } catch (\SlaxWeb\Exception\UnknownPropertyException $e) {
             $exception[1] = true;
         }
         if ($exception !== [true, true]) {
