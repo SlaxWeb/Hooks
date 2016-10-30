@@ -22,21 +22,21 @@ class Container
      *
      * @var \Psr\Log\LoggerInterface
      */
-    protected $_logger = null;
+    protected $logger = null;
 
     /**
      * Hook definition container
      *
      * @var array
      */
-    protected $_hooks = [];
+    protected $hooks = [];
 
     /**
      * Prevent further execution
      *
      * @var bool
      */
-    protected $_stop = false;
+    protected $stop = false;
 
     /**
      * Class constructor
@@ -49,9 +49,9 @@ class Container
      */
     public function __construct(\Psr\Log\LoggerInterface $logger)
     {
-        $this->_logger = $logger;
+        $this->logger = $logger;
 
-        $this->_logger->info("Hooks component initialized");
+        $this->logger->info("Hooks component initialized");
     }
 
     /**
@@ -62,14 +62,14 @@ class Container
      */
     public function addHook(Hook $hook)
     {
-        if (isset($this->_hooks[$hook->name]) === false) {
-            $this->_logger->debug(
+        if (isset($this->hooks[$hook->name]) === false) {
+            $this->logger->debug(
                 "Adding definition for hook '{$hook->name}' for the first time."
             );
-            $this->_hooks[$hook->name] = [];
+            $this->hooks[$hook->name] = [];
         }
 
-        $this->_hooks[$hook->name][] = $hook->definition;
+        $this->hooks[$hook->name][] = $hook->definition;
     }
 
     /**
@@ -86,28 +86,28 @@ class Container
      */
     public function exec(string $name)
     {
-        if (isset($this->_hooks[$name]) === false) {
-            $this->_logger->debug(
+        if (isset($this->hooks[$name]) === false) {
+            $this->logger->debug(
                 "No hook definitions found for '{$name}'. Available hook "
                 . "definitions",
-                [array_keys($this->_hooks)]
+                [array_keys($this->hooks)]
             );
             return null;
         }
 
         $return = [];
         $params = [$this, array_slice(func_get_args(), 1)];
-        foreach ($this->_hooks[$name] as $definition) {
-            if ($this->_stop === true) {
-                $this->_stop = false;
-                $this->_logger->info(
+        foreach ($this->hooks[$name] as $definition) {
+            if ($this->stop === true) {
+                $this->stop = false;
+                $this->logger->info(
                     "Hook execution was interrupted for hook '{$name}'"
                 );
                 break;
             }
 
-            $this->_logger->info("Calling definition for hook '{$name}'");
-            $this->_logger->debug("Hook definition parameters", $params);
+            $this->logger->info("Calling definition for hook '{$name}'");
+            $this->logger->debug("Hook definition parameters", $params);
             $retVal = $definition(...$params);
             if ($retVal !== null) {
                 $return[] = $retVal;
@@ -126,6 +126,6 @@ class Container
      */
     public function stopExec()
     {
-        $this->_stop = true;
+        $this->stop = true;
     }
 }
