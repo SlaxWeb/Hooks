@@ -143,13 +143,12 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddHook()
     {
-        $container = $this->_container->setMethods(null)
-            ->getMock();
+        $container = $this->_container->setMethods(null)->getMock();
 
         $this->_logger->expects($this->exactly(3))->method("info");
         $this->_logger->expects($this->exactly(3))->method("debug");
 
-        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
+        $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
         $this->_hookName = "test";
         $this->_hookDefinition = function () {
             return true;
@@ -215,7 +214,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->_logger->expects($this->exactly(6))->method("debug");
         $container->__construct($this->_logger);
 
-        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
+        $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
 
         for ($hooks = 1; $hooks <= 3; $hooks++) {
             $hook = clone $hook;
@@ -266,7 +265,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $container->__construct($this->_logger);
 
-        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
+        $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
         $this->_hookName = "test";
         $this->_hookDefinition = function () {
             return func_get_args();
@@ -296,7 +295,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->_logger->expects($this->exactly(3))->method("info");
         $container->__construct($this->_logger);
 
-        $hook = $this->getMock("\\SlaxWeb\\Hooks\\Hook");
+        $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
 
         $this->_hookName = "interrupt";
         $this->_hookDefinition = function ($container) {
