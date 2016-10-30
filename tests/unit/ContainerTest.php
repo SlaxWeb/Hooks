@@ -20,14 +20,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      *
      * @var object
      */
-    protected $_logger = null;
+    protected $logger = null;
 
     /**
      * Container Mock Builder
      *
      * @var object
      */
-    protected $_container = null;
+    protected $container = null;
 
     /**
      * Hook name
@@ -36,7 +36,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      *
      * @var string
      */
-    protected $_hookName = "";
+    protected $hookName = "";
 
     /**
      * Hook definition
@@ -45,7 +45,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      *
      * @var callable
      */
-    protected $_hookDefinition = null;
+    protected $hookDefinition = null;
 
     /**
      * Set up the test
@@ -56,11 +56,11 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->_logger = $this->getMockForAbstractClass(
+        $this->logger = $this->getMockForAbstractClass(
             "\\Psr\\Log\\LoggerInterface"
         );
 
-        $this->_container = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Container")
+        $this->container = $this->getMockBuilder("\\SlaxWeb\\Hooks\\Container")
             ->disableOriginalConstructor();
     }
 
@@ -85,11 +85,11 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructorLogs()
     {
-        $container = $this->_container->setMethods(null)
+        $container = $this->container->setMethods(null)
             ->getMock();
-        $this->_logger->expects($this->once())->method("info");
+        $this->logger->expects($this->once())->method("info");
 
-        $container->__construct($this->_logger);
+        $container->__construct($this->logger);
     }
 
     /**
@@ -102,10 +102,10 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddHookTypeHint()
     {
-        $container = $this->_container->setMethods(null)
+        $container = $this->container->setMethods(null)
             ->getMock();
-        $this->_logger->expects($this->once())->method("info");
-        $container->__construct($this->_logger);
+        $this->logger->expects($this->once())->method("info");
+        $container->__construct($this->logger);
 
         // Make sure it typehints
         $error = false;
@@ -143,21 +143,21 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testAddHook()
     {
-        $container = $this->_container->setMethods(null)->getMock();
+        $container = $this->container->setMethods(null)->getMock();
 
-        $this->_logger->expects($this->exactly(3))->method("info");
-        $this->_logger->expects($this->exactly(3))->method("debug");
+        $this->logger->expects($this->exactly(3))->method("info");
+        $this->logger->expects($this->exactly(3))->method("debug");
 
         $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
-        $this->_hookName = "test";
-        $this->_hookDefinition = function () {
+        $this->hookName = "test";
+        $this->hookDefinition = function () {
             return true;
         };
         $hook->expects($this->any())
             ->method("__get")
             ->will($this->returnCallback([$this, "hookReturn"]));
 
-        $container->__construct($this->_logger);
+        $container->__construct($this->logger);
         $container->addHook($hook);
         $container->addHook($hook);
         $this->assertEquals([true, true], $container->exec("test"));
@@ -174,12 +174,12 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testExecHookNameErrors()
     {
-        $container = $this->_container->setMethods(null)->getMock();
+        $container = $this->container->setMethods(null)->getMock();
 
-        $this->_logger->expects($this->once())->method("info");
-        $this->_logger->expects($this->once())->method("debug");
+        $this->logger->expects($this->once())->method("info");
+        $this->logger->expects($this->once())->method("debug");
 
-        $container->__construct($this->_logger);
+        $container->__construct($this->logger);
 
         $exception = [false, false];
         try {
@@ -209,17 +209,17 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testHookOrderOfExec()
     {
-        $container = $this->_container->setMethods(null)->getMock();
-        $this->_logger->expects($this->exactly(5))->method("info");
-        $this->_logger->expects($this->exactly(6))->method("debug");
-        $container->__construct($this->_logger);
+        $container = $this->container->setMethods(null)->getMock();
+        $this->logger->expects($this->exactly(5))->method("info");
+        $this->logger->expects($this->exactly(6))->method("debug");
+        $container->__construct($this->logger);
 
         $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
 
         for ($hooks = 1; $hooks <= 3; $hooks++) {
             $hook = clone $hook;
-            $this->_hookName = "test";
-            $this->_hookDefinition = function () use ($hooks) {
+            $this->hookName = "test";
+            $this->hookDefinition = function () use ($hooks) {
                 if ($hooks === 3) {
                     return null;
                 }
@@ -235,8 +235,8 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($container->exec("test"), [1, 2]);
 
         $hook = clone $hook;
-        $this->_hookName = "test2";
-        $this->_hookDefinition = function () use ($hooks) {
+        $this->hookName = "test2";
+        $this->hookDefinition = function () use ($hooks) {
             return true;
         };
         $hook->expects($this->any())
@@ -258,16 +258,17 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testHookExecParams()
     {
-        $container = $this->_container->setMethods(null)->getMock();
+        $container = $this->container->setMethods(null)->getMock();
 
-        $this->_logger->expects($this->exactly(2))->method("info");
-        $this->_logger->expects($this->exactly(2))->method("debug");
+        $this->logger->expects($this->exactly(2))->method("info");
+        $this->logger->expects($this->exactly(2))->method("debug");
 
-        $container->__construct($this->_logger);
+        $container->__construct($this->logger);
+        $container->setParams([$container]);
 
         $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
-        $this->_hookName = "test";
-        $this->_hookDefinition = function () {
+        $this->hookName = "test";
+        $this->hookDefinition = function () {
             return func_get_args();
         };
         $hook->expects($this->any())
@@ -277,7 +278,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->addHook($hook);
 
         $this->assertEquals(
-            [$container, [true, false, "param"]],
+            [$container, true, false, "param"],
             $container->exec("test", true, false, "param")
         );
     }
@@ -291,14 +292,15 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function testHookInteruption()
     {
-        $container = $this->_container->setMethods(null)->getMock();
-        $this->_logger->expects($this->exactly(3))->method("info");
-        $container->__construct($this->_logger);
+        $container = $this->container->setMethods(null)->getMock();
+        $this->logger->expects($this->exactly(3))->method("info");
+        $container->__construct($this->logger);
+        $container->setParams([$container]);
 
         $hook = $this->createMock("\\SlaxWeb\\Hooks\\Hook");
 
-        $this->_hookName = "interrupt";
-        $this->_hookDefinition = function ($container) {
+        $this->hookName = "interrupt";
+        $this->hookDefinition = function ($container) {
             $container->stopExec();
             return true;
         };
@@ -308,8 +310,8 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $container->addHook($hook);
 
         $hook = clone $hook;
-        $this->_hookName = "interrupt";
-        $this->_hookDefinition = function ($container) {
+        $this->hookName = "interrupt";
+        $this->hookDefinition = function ($container) {
             return false;
         };
         $hook->expects($this->any())
@@ -332,9 +334,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function hookReturn($param)
     {
         if ($param === "name") {
-            return $this->_hookName;
+            return $this->hookName;
         } elseif ($param === "definition") {
-            return $this->_hookDefinition;
+            return $this->hookDefinition;
         }
     }
 }

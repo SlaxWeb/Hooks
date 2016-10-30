@@ -32,6 +32,13 @@ class Container
     protected $hooks = [];
 
     /**
+     * Hook Parameters
+     *
+     * @var array
+     */
+    protected $params = [];
+
+    /**
      * Prevent further execution
      *
      * @var bool
@@ -96,7 +103,7 @@ class Container
         }
 
         $return = [];
-        $params = [$this, array_slice(func_get_args(), 1)];
+        $params = array_merge($this->params, array_slice(func_get_args(), 1));
         foreach ($this->hooks[$name] as $definition) {
             if ($this->stop === true) {
                 $this->stop = false;
@@ -115,6 +122,20 @@ class Container
         }
 
         return count($return) === 1 ? $return[0] : $return;
+    }
+
+    /**
+     * Set parameters
+     *
+     * Set parameters to be used in hook executions.
+     *
+     * @param array $params Array of parameters
+     * @return \SlaxWeb\Hooks\Container
+     */
+    public function setParams(array $params): Container
+    {
+        $this->params = $params;
+        return $this;
     }
 
     /**
