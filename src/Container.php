@@ -78,8 +78,8 @@ class Container
      * Execute all definitions for the retrieved hook names in the order that
      * they have been inserted, and store their return values in an array, if it
      * is not null. If only one definition was called, then return that
-     * executions return value directly, if there were more calls, return the
-     * 'return array'.
+     * executions return value directly, if there were more calls, return all the
+     * return values in an array.
      *
      * @param string Hook name
      * @return mixed
