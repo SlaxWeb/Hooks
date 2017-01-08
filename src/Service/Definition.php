@@ -17,11 +17,11 @@ namespace SlaxWeb\Hooks\Service;
 abstract class Definition implements \Pimple\ServiceProviderInterface
 {
     /**
-     * Application Container
+     * Hook definition container
      *
-     * @var \Pimple\Container
+     * @var array
      */
-    protected $_app = null;
+    protected $hooks = [];
 
     /**
      * Register Provider
@@ -34,9 +34,12 @@ abstract class Definition implements \Pimple\ServiceProviderInterface
      */
     public function register(\Pimple\Container $container)
     {
-        $this->_app = $container;
-
         $this->define();
+        foreach ($this->hooks as $hookName => $hookDef) {
+            $hook = $container["newHook.factory"];
+            $hook->create($hookName, $hookDef);
+            $container["hooks.service"]->addHook($hook);
+        }
     }
 
     /**
